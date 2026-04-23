@@ -2,18 +2,130 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Une petite question...</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Me connais-tu ?</title>
+    <style>
+        /* CSS INTERNE POUR PLUS DE SIMPLICITÉ */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #fdf2f2;
+            font-family: 'Segoe UI', sans-serif;
+            padding: 10px;
+        }
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 450px; /* S'adapte sur PC, reste lisible sur Mobile */
+            text-align: center;
+            box-sizing: border-box;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border: 2px solid #ffcdd2;
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 16px; /* Évite le zoom auto sur iPhone */
+        }
+        button {
+            background: #d32f2f;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.3s;
+        }
+        .question-block {
+            text-align: left;
+            background: #fff5f5;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        .options label {
+            display: block;
+            margin: 10px 0;
+            font-size: 15px;
+        }
+        #error-msg { color: #d32f2f; font-size: 14px; margin-top: 10px; display: none; }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1 id="question">Est-ce que tu m'aimes ? ❤️</h1>
-        <div class="buttons">
-            <button id="btn-oui">Oui</button>
-            <button id="btn-non">Non</button>
+
+    <div id="login-section" class="container">
+        <h1>Bienvenue ! ❤️</h1>
+        <p>Seul mon amie peut entrer ici...</p>
+        <input type="text" id="user-name" placeholder="Ton prénom ici...">
+        <button onclick="verifierPrenom()">Valider</button>
+        <p id="error-msg">Accès refusé. Tu n'es pas la personne attendue !</p>
+    </div>
+
+    <div id="quiz-section" class="container" style="display: none;">
+        <h2>Me connais-tu ?</h2>
+        <div id="questions-container"></div>
+        <button id="submit-quiz" onclick="calculerResultat()">Vérifier mes réponses</button>
+        
+        <div id="result-area" style="display: none;">
+            <h2 id="score-text"></h2>
+            <div id="corrections" style="text-align: left; font-size: 14px; margin-bottom: 15px;"></div>
+            <button onclick="window.location.href='amour.html'">Continuer le jeu ✨</button>
         </div>
     </div>
-    <script src="script.js"></script>
+
+    <script>
+        const dataQuiz = [
+            { q: "Ma couleur préférée ?", options: ["Bleu", "Noir", "Rouge"], reponse: "Noir" },
+            { q: "Combien de chiens ai-je ?", options: ["1", "2", "3"], reponse: "2" },
+            { q: "Ma fratrie ?", options: ["Unique", "2 frères et 1 soeur", "1 frère et 2 soeurs"], reponse: "2 frères et 1 soeur" },
+            { q: "Ma date de naissance ?", options: ["20/09/2001", "20/09/2002", "20/10/2002"], reponse: "20/09/2002" }
+        ];
+
+        function verifierPrenom() {
+            const prenom = document.getElementById('user-name').value.trim().toUpperCase();
+            if (prenom.startsWith('J') || prenom.startsWith('C')) {
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('quiz-section').style.display = 'block';
+                chargerQuiz();
+            } else {
+                document.getElementById('error-msg').style.display = 'block';
+            }
+        }
+
+        function chargerQuiz() {
+            const container = document.getElementById('questions-container');
+            dataQuiz.forEach((item, index) => {
+                let html = `<div class="question-block"><p><strong>${item.q}</strong></p>`;
+                item.options.forEach(opt => {
+                    html += `<label><input type="radio" name="q${index}" value="${opt}"> ${opt}</label>`;
+                });
+                container.innerHTML += html + `</div>`;
+            });
+        }
+
+        function calculerResultat() {
+            let score = 0;
+            let corrections = "";
+            dataQuiz.forEach((item, index) => {
+                const sel = document.querySelector(`input[name="q${index}"]:checked`);
+                if (sel && sel.value === item.reponse) score++;
+                else corrections += `<p>❌ <b>${item.q}</b>: ${item.reponse}</p>`;
+            });
+            document.getElementById('score-text').innerText = `Score: ${(score/4)*100}%`;
+            document.getElementById('corrections').innerHTML = corrections;
+            document.getElementById('result-area').style.display = 'block';
+            document.getElementById('submit-quiz').style.display = 'none';
+        }
+    </script>
 </body>
 </html>
